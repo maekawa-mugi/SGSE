@@ -1,0 +1,14 @@
+Thu Jan 22 10:20:22 1998  Koji Kishi  <kis@hdsoft.sony.co.jp>
+
+	* SGSE-1.1 リリース
+
+	* search.pl: 入力した検索キーをそのまま表示していた部分が
+	残っていたので修正。thanx > ccsatoru.
+
+Fri Jan 16 14:44:43 1998  Koji Kishi  <kis@hdsoft.sony.co.jp>
+
+	* update/word.pl: shtml を html と判断するよう変更
+
+Mon Jan 12 11:27:22 1998  Koji Kishi  <kis@hdsoft.sony.co.jp>
+
+	* search.pl: 表示件数を指定できるよう変更

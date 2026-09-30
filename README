@@ -1,0 +1,191 @@
+
+SGSE (Sony Global Search Engine) は www.sony.co.jp で利用するために作
+られた検索エンジンです。
+
+SGSE は www.sony.co.jp での利用に特化しており、必ずしも他の Web サイト
+で使い易いようには作られていません。しかし、SGSE の前身である SSE がフ
+リーソフトウェアとして公開されたことで他の日本語の使えるサーチエンジン
+のフリーソフトウェア開発に拍車がかかった、ということがあり、SGSE もそ
+のようなきっかけの一つになるのでは考えて、ここに公開いたします。
+
+SGSE は、GNU General Public License Version 2に従う形で配布され、著作
+権者はソニー株式会社です。著作権に関する詳細はCOPYINGファイル (英語で
+書かれています) を御覧下さい。
+
+
+1. 特徴
+
+・インデックスの作成が高速です。これは形態素解析 (語句を分けた) 後のデー
+タを中間ファイルとして持ち、前回からの追加/変更/削除に応じて処理するよ
+うにしたためです。www.sony.co.jp(P6-200) では現在約 7 万ファイルを毎日
+二時間以内で処理しています。
+
+・検索対象に任意のディレクトリ以下を指定できます。
+
+・perl で書かれており、行数にして 1100行程度でシンプルです。
+
+・(), not, and, or が使えます。前方一致、後方一致機能はありません。
+
+・検索対象にハイフンの入っている語句があるときは、
+	ハイフンが入ったまま
+	ハイフンを削除したもの
+	ハイフンで分けたもの
+のいずれでもヒットします。
+
+
+2. 動作する OS について
+
+・FreeBSD2.2 で動作確認しています。
+・FreeBSD2.2 以外の UNIX or UNIX互換 OS での動作確認はしていません。
+・Windows95/NT、Macintosh では動作しません。著作権者による移植の予定は
+ありません。
+
+
+3. 動作させるために必要なもの
+
+SGSE だけでは動作しません。次のソフトウェアをそろえる必要があります。
+もちろんすべてフリーソフトウェアです。参考までに私の入手先を入れておき
+ますが、他にも入手先はあると思います。
+
+・perl5.004_04.tar.gz
+	ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/src/5.0/
+
+・MD5-1.7.tar.gz
+	ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/modules/by-modules/MD5/
+
+・MIME-Base64-2.04.tar.gz
+	ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/modules/by-modules/MIME/
+
+・jcode.pl-2.6
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
+
+・nkf-1.62
+	ftp://ftp.jp.freebsd.org/pub/FreeBSD/distfiles/
+
+・wget-1.4.5.tar.gz
+	ftp://ftp.jp.freebsd.org/pub/FreeBSD/distfiles/
+
+・chasen-sys1.51-dic1.5.tar.gz
+	http://cactus.aist-nara.ac.jp/lab/nlt/chasen.html
+
+その他、行の長さに制限のない sort が必要です。FreeBSD2.2 の 
+/usr/bin/sort は問題ありません。
+
+
+4. インストール
+
+・Web Server を用意し、cgi が使えるよう設定します。
+
+・上記で紹介したソフトウェアをインストールします。
+
+・SGSE を展開する場所を決めます。ここでは /usr/home/sgse/SGSE/ とします。
+
+・SGSE の cgi を置く場所を決めます。ここでは 
+/usr/home/sgse/public_html/search/とします。
+
+・他の Web サイトから HTML を取得する場所を決めます。ここでは
+/usr/home/sgse/mirror/ とします。
+
+・ログを書くファイルを決めます。ここでは /usr/home/sgse/logs/search_log 
+とします。
+
+・SGSE を展開します。
+
+	% cd /usr/home/sgse
+	% tar xzf SGSE.tar.gz
+	% cd SGSE
+
+・ファイルを先に決めた位置にコピーします。
+
+	% mkdir -p /usr/home/sgse/public_html/search
+	% cp cgi/* /usr/home/sgse/public_html/search/
+	% mkdir -p /usr/home/sgse/mirror/logs
+	% cp wget/* /usr/home/sgse/mirror/
+	% mkdir -p /usr/home/sgse/logs
+	% chmod 777 /usr/home/sgse/logs
+
+・ファイルの設定をします。
+
+	◎ /usr/home/sgse/public_html/search/search.cgi
+
+		chdir '/usr/local/SYSTEM/Search/sonydrive';
+			↓
+		chdir '/usr/home/sgse/SGSE';
+
+	◎ /usr/home/sgse/SGSE/search.pl
+
+		$file_log = '/usr/local/WWW/search.sony.co.jp/logs/search_log';
+			↓
+		$file_log = '/usr/home/sgse/logs/search_log';
+
+	◎ /usr/home/sgse/SGSE/update/Run00.sh
+
+		/bin/cat /usr/local/SYSTEM/mirror/logs/*.log | sed 's/^/\/usr\/local\/SYSTEM\/mirror\//' | /usr/bin/sort | /usr/bin/uniq > HTML.src
+			↓
+		/bin/cat /usr/home/sgse/mirror/logs/*.log | sed 's/^/\/usr\/home\/sgse\/mirror\//' | /usr/bin/sort | /usr/bin/uniq > HTML.src
+
+	◎ /usr/home/sgse/SGSE/update/config.pl
+
+		return $s if ($s =~ s/^\/usr\/local\/SYSTEM\/mirror\//http\:\/\//);
+			↓
+		return $s if ($s =~ s/^\/usr\/home\/sgse\/mirror\//http\:\/\//);
+
+・HTML を取得します。
+
+	% cd /usr/home/sgse/mirror;
+	% ./get_html.pl www.hoge.co.jp
+
+・インデックスを作ります。
+
+	% cd /usr/home/sgse/SGSE/update;
+	% ./Run00.sh
+	% ./Run.sh
+
+	これでできあがりです。
+	./Run00.sh の実行は初回のみ時間がかかります。
+
+
+5. その他の機能
+
+・update/CONF
+
+このファイルでURLの名称を指定できます。タブで区切って
+
+http://hoge.co.jp	Hoge hoge SITE
+http://hoge.co.jp/gesho	Gesho gesho SITE
+
+というように指定します。URL のディレクトリが深いほうが優先されます。
+
+・update/group
+
+複数の URL をまとめて一つにしたいときにこのファイルを作ります。
+このファイルで指定すると、hidden で渡す url で検索対象の指定ができるよ
+うになります。サンプルは
+	update/groups/sow
+です。(こちらでは ln -s groups/sow group としてます)。
+
+・update/usedir
+
+形態素解析/語句分け語のファイルからインデックスを作るときに、
+インデックスを作る対象の URL を絞りたいときにこのファイルを作ります。
+サンプルは
+	update/usedirs/
+にあります。(こちらでは group と同様リンクして使ってます)。
+
+・archive/
+
+できあがったインデックスはこのディレクトリに圧縮されて保管されます。イ
+ンターネット上のサーバーで作ったインデックスをイントラネットで活用した
+いときには、このディレクトリをミラーリングすれば OK です。
+
+
+6. 問い合わせ先
+
+http://www.sony.co.jp/ServiceArea/FeedBack/index-j.html
+
+より、
+	分野: 製品以外 → ホームページ
+	目的: ホームページに関するご意見
+
+を選択して問い合わせてください。
+

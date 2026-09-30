@@ -1,0 +1,40 @@
+
+HTML.flist
+	URL
+	md5
+	mtime
+	名称
+	title (Base64)
+	description (Base64)
+	keyword (Base64)
+	最初の30word
+
+HTML.inv
+	HTML.flist の ftell 値
+	
+HMTL.dir	
+	URL
+	通し番号
+
+HTML.inv
+	word
+	通し番号 score
+
+update/CONF
+	URL
+	名称 (Base64)
+
+update/HTML.src
+	filename
+
+update/HTML.word
+	filename
+	md5
+	mtime
+	title (Base64)
+	description (Base64)
+	keyword (Base64)
+	title 語句分けしたもの
+	description 語句分けしたもの
+	keyword 語句分けしたもの
+	本文を語句分けしたもの
